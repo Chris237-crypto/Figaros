@@ -1,0 +1,58 @@
+// prisma/schema.prisma
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  verified     Boolean  @default(false)
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  tokens       VerificationToken[]
+}
+
+model VerificationToken {
+  // hash SHA-256 en hex (64 chars)
+  tokenHash  String   @id @db.VarChar(64)
+
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt  DateTime @default(now())
+  expiresAt  DateTime
+  consumedAt DateTime?
+
+  @@index([userId])
+}
+
+model Turno {
+  id          String   @id @default(cuid())
+  // opcional: si luego quieres vincular al usuario creador
+  // createdById String?
+
+  nombre      String
+  servicio    String
+  otroServicio String? // si viene "otros"
+  fecha       DateTime // guardamos sólo la fecha (00:00)
+  hora        String   // "HH:MM"
+  telefono    String?
+  grupoId     String?  // para lotes de múltiples turnos
+  turnoIndex  Int?     // 1..n dentro del lote
+
+  createdAt   DateTime @default(now())
+  // Fecha de vencimiento (7 días desde ahora) – se usa para borrar
+  expiresAt   DateTime @default(dbgenerated("(now() + interval '7 days')"))
+
+  @@index([fecha, hora])
+  @@index([expiresAt])
+}
