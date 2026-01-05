@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "nodemon src/index.js",
     "start": "node src/index.js",
+    "vercel-build": "prisma generate",
     "prisma:dev": "prisma migrate dev --name init",
     "prisma:generate": "prisma generate"
   },
