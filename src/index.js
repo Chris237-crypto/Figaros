@@ -48,5 +48,10 @@ app.use((err, _req, res, _next) => {
 // Cron de limpieza (borra turnos con expiresAt <= now)
 startCleanupJob();                                    // <-- Arranca cron
 
-// Server
-app.listen(PORT, () => console.log(`API escuchando en :${PORT}`));
+// Server - solo en desarrollo local
+if (process.env.NODE_ENV !== "production") {
+  app.listen(PORT, () => console.log(`API escuchando en :${PORT}`));
+}
+
+// Exportar para Vercel serverless
+module.exports = app;
